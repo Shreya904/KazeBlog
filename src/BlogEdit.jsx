@@ -1,41 +1,31 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useHistory } from "react-router-dom";
+import useFetch from "./usefetch";
 
 const BlogEdit = () => {
   const { id } = useParams();
   const history = useHistory();
-  const [blog, setBlog] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const {
+    data: blog,
+    isPending,
+    error,
+  } = useFetch(`http://localhost:8000/blogs/${id}`);
   const [formData, setFormData] = useState({
     title: "",
     body: "",
     author: "",
   });
 
+  // Update formData with blog data when it becomes available
   useEffect(() => {
-    // Fetch the current blog data
-    fetch(`http://localhost:8000/blogs/${id}`)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Could not fetch blog data.");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setBlog(data);
-        setFormData({
-          title: data.title,
-          body: data.body,
-          author: data.author,
-        });
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
+    if (blog) {
+      setFormData({
+        title: blog.title,
+        body: blog.body,
+        author: blog.author,
       });
-  }, [id]);
+    }
+  }, [blog]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -46,21 +36,21 @@ const BlogEdit = () => {
     e.preventDefault();
 
     fetch(`http://localhost:8000/blogs/${id}`, {
-      method: "PUT", // or "PATCH" if you prefer
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(formData),
     })
       .then(() => {
-        history.push(`/blogs/${id}`); // Redirect to the blog details page after update
+        history.push(`/blogs/${id}`);
       })
       .catch((err) => {
         console.error("Error updating blog:", err);
       });
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (isPending) return <div>Loading...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
 
   return (
