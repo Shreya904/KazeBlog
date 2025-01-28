@@ -1,26 +1,51 @@
 import { useParams, useHistory } from "react-router-dom";
-import useFetch from "./usefetch";
+import { useState, useEffect } from "react";
+import { database } from "./utils/appwrite";
 
 const BlogDetails = () => {
-  const { id } = useParams();
-  const {
-    data: blog,
-    error,
-    isPending,
-  } = useFetch("http://localhost:8000/blogs/" + id);
+  const { id } = useParams(); // Extract the blog ID from the URL
+  const [blog, setBlog] = useState(null);
+  const [error, setError] = useState(null);
+  const [isPending, setIsPending] = useState(true);
   const history = useHistory();
 
-  const handleDelete = () => {
-    fetch("http://localhost:8000/blogs/" + blog.id, {
-      method: "DELETE",
-    }).then(() => {
-      history.push("/");
-    });
+  useEffect(() => {
+    const fetchBlog = async () => {
+      setIsPending(true);
+      setError(null);
+
+      console.log("Fetching document with ID:", id); // Debugging
+      try {
+        const response = await database.getDocument(
+          "blogsapp", // Database ID
+          "blogs", // Collection ID
+          id // Document ID
+        );
+        console.log("Document fetched:", response);
+        setBlog(response);
+      } catch (err) {
+        console.error("Error fetching blog:", err);
+        setError("Failed to fetch the blog. Please try again.");
+      } finally {
+        setIsPending(false);
+      }
+    };
+
+    fetchBlog();
+  }, [id]);
+
+  const handleDelete = async () => {
+    try {
+      await database.deleteDocument("blogsapp", "blogs", id);
+      history.push("/"); // Redirect to home after deletion
+    } catch (err) {
+      console.error("Error deleting blog:", err);
+      setError("Failed to delete the blog. Please try again.");
+    }
   };
 
   const handleEdit = () => {
-    // Navigate to the edit page, assuming the route is /edit/:id
-    history.push(`/edit/${blog.id}`);
+    history.push(`/edit/${id}`); // Navigate to the edit page
   };
 
   return (

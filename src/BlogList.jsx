@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-
 const BlogList = ({ blogs, title }) => {
   return (
     <div className="blog-list max-w-[600px] mx-auto px-[20px]">
@@ -7,9 +6,11 @@ const BlogList = ({ blogs, title }) => {
       {blogs.map((blog) => (
         <div
           className="blog-preview p-[16px] mb-[16px] bg-black rounded-lg border border-gray-800 shadow-sm hover:shadow-lg transition-shadow duration-200 ease-in-out"
-          key={blog.id}
+          key={blog.$id} // Use $id here
         >
-          <Link to={`/blogs/${blog.id}`}>
+          <Link to={`/blogs/${blog.$id}`}>
+            {" "}
+            {/* Use $id here */}
             <h2 className="text-xl font-bold text-pink-400 mb-[4px] transition-colors duration-200 ease-in-out hover:text-pink-300">
               {blog.title}
             </h2>

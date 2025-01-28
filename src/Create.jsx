@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useHistory } from "react-router-dom";
+import { database, ID } from "./utils/appwrite"; // Adjust the path as needed
 
 const Create = () => {
   const [title, setTitle] = useState("");
@@ -8,21 +9,28 @@ const Create = () => {
   const [isPending, setIsPending] = useState(false);
   const history = useHistory();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const blog = { title, body, author };
 
     setIsPending(true);
-    fetch("http://localhost:8000/blogs", {
-      //in json server this is how we make a post request
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(blog),
-    }).then(() => {
-      console.log("new blog added");
+
+    try {
+      // Replace "your-database-id" and "your-collection-id" with actual IDs
+      await database.createDocument(
+        "blogsapp", // Database ID
+        "blogs", // Collection ID
+        ID.unique(), // Unique document ID
+        blog
+      );
+
+      console.log("New blog added to Appwrite database");
       setIsPending(false);
       history.push("/");
-    });
+    } catch (error) {
+      console.error("Error adding blog:", error);
+      setIsPending(false);
+    }
   };
 
   return (
