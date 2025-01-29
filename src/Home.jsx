@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import BlogList from "./BlogList";
+import BlogList from "./blogList";
 import { database } from "./utils/appwrite"; // Import the Appwrite database instance
 
 const Home = () => {
